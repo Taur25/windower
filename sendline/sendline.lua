@@ -25,22 +25,7 @@ if permission_lookup[original_mode] then
 -- オリジナルのテキストを取得
 	local message = windower.from_shift_jis(original)
 
-	function string.endswith(s, endStr)
-	    return endStr == '' or s:sub(-#endStr) == endStr
-	end
-
-	function removeSuffix(s, suffix)
-	    if string.endswith(s, suffix) then
-	        return s:sub(1, -#suffix-1)
-	    end
-	    return s
-	end
-
-	local endline = string.char(0x7F, 0x31)
-	local message = removeSuffix(message, endline)
-
-	message = message:gsub("[%c]", "") 
-	
+	message = message:gsub("\127\49", ""):gsub("%c", "")
 
 	if windower.regex.match(message,pattern) then
 		--print("Matched: " .. message) -- デバッグ用
