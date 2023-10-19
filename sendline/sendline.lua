@@ -9,16 +9,39 @@ local ltn12 = require("ltn12")
 local ifttt_key = "***************" -- ここにIFTTTのWebhookキーを設定
 local event_name = "hogehoge" -- ここにIFTTTで設定したイベント名を設定
 
-local pattern = '(.*トレジャーハンターの効果が.*にアップ.*|.*ビジタント消滅まで残り.*)'
-local permission_lookup = {
-	[148] = true,	--ビジタント
-	[20] = true,	--トレハン
+local pattern_m = {
+	[20] = 'トレジャーハンターの効果が.*にアップ',
+	[148] = 'ビジタント消滅まで残り',
+	[150] = 'クポ',
+	[141] = 'クポ',
+	[127] = 'エミネンス',
 	}
+
+-- patternを生成
+local patterns = {}
+	for _, v in pairs(pattern_m) do
+		table.insert(patterns, ".*" .. v .. ".*")
+	end
+local pattern = table.concat(patterns, "|")
+
+-- permission_lookupを生成
+local permission_lookup = {}
+	for k, _ in pairs(pattern_m) do
+   		permission_lookup[k] = true
+	end
+
 
 local message_queue = {}
 
 -- incoming_textイベントハンドラを登録
 windower.register_event("incoming text", function(original, modified, original_mode, modified_mode, blocked)
+
+	--tell(mode:12)がきたときの処理(名前が文字化けするなぁ)
+	if original_mode == 12 then
+		local message = windower.from_shift_jis(original)
+		message = message:gsub("\127\49", ""):gsub("%c", "")
+		table.insert(message_queue, 'TELL from :' .. message) -- キューにメッセージを追加
+	end
 
 if permission_lookup[original_mode] then
 
