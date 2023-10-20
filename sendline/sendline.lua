@@ -4,17 +4,17 @@
 local http = require("socket.http")
 local ltn12 = require("ltn12")
 
-
 -- IFTTTのWebhook設定
-local ifttt_key = "***************" -- ここにIFTTTのWebhookキーを設定
-local event_name = "hogehoge" -- ここにIFTTTで設定したイベント名を設定
+local ifttt_key = "*************" -- ここにIFTTTのWebhookキーを設定
+local event_name = "LINE_FFXI" -- ここにIFTTTで設定したイベント名を設定
 
-local pattern_m = {
-	[20] = 'トレジャーハンターの効果が.*にアップ',
+--マッチング文字列　[]内はログのモード番号 検索は文字列の前後に.*を付けて正規表現を行う モード番号と文字列は1:1にはなっていない
+local pattern_m = { 
 	[148] = 'ビジタント消滅まで残り',
-	[150] = 'クポ',
-	[141] = 'クポ',
-	[127] = 'エミネンス',
+	[38]  = 'に倒された。',
+--	[150] = 'クポ',--このへんはテスト用
+--	[141] = 'クポ',
+--	[127] = 'エミネンス',
 	}
 
 -- patternを生成
@@ -30,13 +30,12 @@ local permission_lookup = {}
    		permission_lookup[k] = true
 	end
 
-
 local message_queue = {}
 
 -- incoming_textイベントハンドラを登録
 windower.register_event("incoming text", function(original, modified, original_mode, modified_mode, blocked)
 
-	--tell(mode:12)がきたときの処理(名前が文字化けするなぁ)
+	--tell(mode:12)が来た時は内容に依らず送信(名前が文字化けするなぁ)
 	if original_mode == 12 then
 		local message = windower.from_shift_jis(original)
 		message = message:gsub("\127\49", ""):gsub("%c", "")
