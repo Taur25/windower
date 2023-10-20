@@ -1,4 +1,4 @@
--- Windower用のスクリプト
+-- Windower用のスクリプト 
 
 -- 依存ライブラリをロード
 local http = require("socket.http")
